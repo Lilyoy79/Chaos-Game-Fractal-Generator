@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            #Canvas{
+                float: left;
+            }
+            .PresetButton{
+                height: 73px;
+                width: 200px;
+            }
+            #Presets{
+                height: 512px;
+            }
+            .SkinnyInput{
+                width: 50px;
+            }
+        </style>
+    </head>
+    <body>
+        <label>Sides: </label>
+        <input id="Sides" type="number" value=3>
+        <br>
+        <label>Fraction: </label>
+        <input id="Numer" type="number" class="SkinnyInput" value=1>
+        <label> / </label>
+        <input id="Denom" type="number" class="SkinnyInput" value=2>
+        <br>
+        <button onclick="SlowGenerate()" id="SSG">Start Slow Generating</button>
+        <button onclick="InstantGenerate(100000)">Instant Generate (Low Quality)</button>
+        <button onclick="InstantGenerate(1000000)">Instant Generate (High Quality)</button>
+        <br>
+        <label>Include center</label>
+        <input type="checkbox" id="IncludeCenter">
+        <br>
+        <label>Include edges</label>
+        <input type="checkbox" id="IncludeEdges">
+        <br>
+        <canvas width=512 height=512 id="Canvas"></canvas>
+        <div id="Presets">
+            <button onclick="LoadPreset(3,1,2,false,false)" class="PresetButton">Sierpinsky Triangle</button><br>
+            <button onclick="LoadPreset(4,2,3,false,false)" class="PresetButton">Cantor Dust</button><br>
+            <button onclick="LoadPreset(4,2,3,true,false)" class="PresetButton">Vicsek Fractal</button><br>
+            <button onclick="LoadPreset(4,2,3,false,true)" class="PresetButton">Sierpinsky Carpet</button><br>
+            <button onclick="LoadPreset(5,5,8,false,false)" class="PresetButton">Pentaflake</button><br>
+            <button onclick="LoadPreset(6,2,3,false,false)" class="PresetButton">Sierpinsky Hexagon</button><br>
+            <button onclick="LoadPreset(6,2,3,true,false)" class="PresetButton">Hexaflake</button><br>
+        </div>
+        <a id="DownloadImg" onclick="Download()" href="javascript:void(0)">Download Image</a>
+        <script>
+            const Canvas=document.getElementById("Canvas");
+            const Sides=document.getElementById("Sides");
+            const Numer=document.getElementById("Numer");
+            const Denom=document.getElementById("Denom");
+            const SSG=document.getElementById("SSG");
+            const IncludeCenter=document.getElementById("IncludeCenter");
+            const IncludeEdges=document.getElementById("IncludeEdges");
+            const DownloadImg=document.getElementById("DownloadImg");
+            const Ctx=Canvas.getContext("2d");
+            var DotInterval;
+            Ctx.translate(256,256);
+            IsGenerating=false;
+            function LoadPreset(AmtSides,Num,Den,InclCen,InclEdges){
+                Sides.value=AmtSides;
+                Numer.value=Num;
+                Denom.value=Den;
+                IncludeCenter.checked=InclCen;
+                IncludeEdges.checked=InclEdges;
+                InstantGenerate(100000);
+            }
+            function Download(){
+                var anchor = document.createElement("a");
+                anchor.href = Canvas.toDataURL("image/png");
+                anchor.download = "IMAGE.PNG";
+                anchor.click();
+            }
+            function InstantGenerate(Iterations){
+                VerticesL=Vertices(Sides.value);
+                Reset();
+                if (IsGenerating){
+                    SlowGenerate();
+                }
+                x=RandInt(-256,257);
+                y=RandInt(-256,257);
+                for (let i=0; i<Iterations; i++){
+                    NextPoint();
+                }
+            }
+            function SlowGenerate(){
+                VerticesL=Vertices(Sides.value);
+                if (IsGenerating){
+                    IsGenerating=false;
+                    SSG.innerHTML="Start Slow Generating"
+                    clearInterval(DotInterval);
+                }else{
+                    SSG.innerHTML="Stop Generating";
+                    IsGenerating=true;
+                    Reset();
+                    x=RandInt(-256,257);
+                    y=RandInt(-256,257);
+                    const DotInterval=setInterval(function(){NextPoint();},1);
+                }
+            }
+            function NextPoint(){
+                NewPts=NewPoint(x,y,Numer.value/Denom.value);
+                x=NewPts[0];
+                y=NewPts[1];
+            }
+            function Reset(){
+                Ctx.fillStyle="rgb(0,0,0)";
+                Ctx.fillRect(-256,-256,512,512);
+            }
+            function ShowVert(){
+                Reset();
+                for (let i=0; i<AmtPoints; i++){
+                    Ctx.fillStyle="rgb(255,255,255)";
+                    Ctx.fillRect(Vertices(Sides.value)[i][0]-2,Vertices(Sides.value)[i][1]-2,4,4);
+                }
+            }
+            function AddPoint(x,y,Color){
+                //Color is a list
+                Rgb="rgb("+String(Color[0])+","+String(Color[1])+","+String(Color[2])+")";
+                Ctx.fillStyle=Rgb;
+                Ctx.fillRect(x,y,1,1);
+            }
+            function RandInt(min,max) {
+                return Math.floor(Math.random()*(max-min))+min;
+            }
+            function NewPoint(x0,y0,Ratio){
+                var Rand=RandInt(0,AmtPoints);
+                var x1=VerticesL[Rand][0];
+                var y1=VerticesL[Rand][1];
+                var x0new=x1-x0;
+                x0new*=Ratio;
+                x0new+=x0;
+                var y0new=y1-y0;
+                y0new*=Ratio;
+                y0new+=y0;
+                AddPoint(x0new,y0new,ColorL[Rand]);
+                return [x0new,y0new];
+            }
+            function Vertices(){
+                ColorL=[];
+                var Step=2*Math.PI/Sides.value;
+                var Ans=[];
+                for (let i=0; i<Sides.value; i++){
+                    Radians=Step*i;
+                    Radians-=Math.PI; //To flip shape
+                    Ansx=250*Math.sin(Radians);
+                    Ansy=250*Math.cos(Radians);
+                    Ans.push([Ansx,Ansy]);
+                }
+                if (IncludeEdges.checked){
+                    var MidPoints=[];
+                    for (let i=0; i<Ans.length; i++){
+                        PrevI=i-1;
+                        if (PrevI==-1){
+                            PrevI=Ans.length-1;
+                        }
+                        MidX=Ans[i][0]+Ans[PrevI][0];
+                        MidX*=.5;
+                        MidY=Ans[i][1]+Ans[PrevI][1];
+                        MidY*=.5;
+                        MidPoints.push([MidX,MidY]);
+                    }
+                    Ans=Ans.concat(MidPoints);
+                }
+                if (IncludeCenter.checked){
+                    Ans.push([0,0]);
+                }
+                AmtPoints=Ans.length;
+                for (let i=0; i<AmtPoints; i++){
+                    ColorL.push(CalcColor(Ans[i][0],Ans[i][1]));
+                }
+                return Ans;
+            }
+            function CalcColor(x,y){
+                if (x==0 && y==0){
+                    return [255,255,255];
+                }else{
+                    var Radians=Math.atan2(y,x);
+                    var deg=Radians*180/Math.PI;
+                    deg+=90
+                    while (deg<0){
+                        deg+=360;
+                    }
+                    var Ans;
+                    if (0<=deg && deg<=60){
+                        Ans=[255,deg*17/4,0];
+                    }
+                    if (60<deg && deg<=120){
+                        Ans=[255-deg*17/8,255,0];
+                    }
+                    if (120<deg && deg<=180){
+                        Ans=[0,255,deg*17/4-510];
+                    }
+                    if (180<deg && deg<=240){
+                        Ans=[0,255-deg*17/4+765,255];
+                    }
+                    if (240<deg && deg<=300){
+                        Ans=[deg*17/4-1020,0,255];
+                    }
+                    if (300<deg && deg<=360){
+                        Ans=[255,0,255-deg*17/4+1275];
+                    }
+                    return [Math.floor(Ans[0]),Math.floor(Ans[1]),Math.floor(Ans[2])];
+                }
+            }
+            Reset()
+        </script>
+    </body>
+</html>

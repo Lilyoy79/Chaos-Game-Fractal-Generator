@@ -15,6 +15,9 @@
             .SkinnyInput{
                 width: 50px;
             }
+            ul{
+                width: 500px;
+            }
         </style>
     </head>
     <body>
@@ -28,25 +31,47 @@
         <br>
         <button onclick="SlowGenerate()" id="SSG">Start Slow Generating</button>
         <button onclick="InstantGenerate(100000)">Instant Generate (Low Quality)</button>
-        <button onclick="InstantGenerate(1000000)">Instant Generate (High Quality)</button>
+        <button onclick="InstantGenerate(1000000)">Generate High Quality</button>
         <br>
-        <label>Include center</label>
+        <label>Include Center</label>
         <input type="checkbox" id="IncludeCenter">
         <br>
-        <label>Include edges</label>
+        <label>Include Center of the Edges</label>
         <input type="checkbox" id="IncludeEdges">
         <br>
         <canvas width=512 height=512 id="Canvas"></canvas>
         <div id="Presets">
             <button onclick="LoadPreset(3,1,2,false,false)" class="PresetButton">Sierpinsky Triangle</button><br>
-            <button onclick="LoadPreset(4,2,3,false,false)" class="PresetButton">Cantor Dust</button><br>
-            <button onclick="LoadPreset(4,2,3,true,false)" class="PresetButton">Vicsek Fractal</button><br>
+            <button onclick="LoadPreset(4,2,3,false,false)" class="PresetButton">Cantor Dust<sup>1</sup></button><br>
+            <button onclick="LoadPreset(4,2,3,true,false)" class="PresetButton">Vicsek Fractal<sup>1</sup></button><br>
             <button onclick="LoadPreset(4,2,3,false,true)" class="PresetButton">Sierpinsky Carpet</button><br>
-            <button onclick="LoadPreset(5,5,8,false,false)" class="PresetButton">Pentaflake</button><br>
-            <button onclick="LoadPreset(6,2,3,false,false)" class="PresetButton">Sierpinsky Hexagon</button><br>
-            <button onclick="LoadPreset(6,2,3,true,false)" class="PresetButton">Hexaflake</button><br>
+            <button onclick="LoadPreset(5,5,8,false,false)" class="PresetButton">Pentaflake<sup>2</sup></button><br>
+            <button onclick="LoadPreset(6,2,3,false,false)" class="PresetButton">Sierpinsky Hexagon<sup>1</sup></button><br>
+            <button onclick="LoadPreset(6,2,3,true,false)" class="PresetButton">Hexaflake<sup>1</sup></button><br>
         </div>
         <a id="DownloadImg" onclick="Download()" href="javascript:void(0)">Download Image</a>
+        <h1>Tips:</h1>
+        <ul>
+            <li>Where <i>n</i> is the number of vertices, the fraction <i>n/(n+1)</i> nearly always produces interesting patterns.<sup>3</sup> (The number of vertices is the number of sides. If the center of the edges are included, the number of vertices is two times the number of sides. If the center is included, the number of vertices is increased by one.)</li>
+            <li>Designs are no longer interesting when the number of sides greater than six. It is suggested that the number of sides is between and including three and six.</li>
+            <li>Remember to wait a few seconds after clicking the "Generate High Quality," it may take a few seconds.</li>
+            <li>Some designs may only need to be rendered in low quality to appear presentable.</li>
+            <li>In the case that you have discovered a new fractal that is not on the list, you may be able to find a name for it at <a href="https://handwiki.org/wiki/List_of_fractals_by_Hausdorff_dimension" target="_blank">https://handwiki.org/wiki/List_of_fractals_by_Hausdorff_dimension</a></li>
+            <li>If you want to know the algorithm behind this generator, visit this site: <a href="https://beltoforion.de/en/recreational_mathematics/chaos_game.php" target="_blank">https://beltoforion.de/en/recreational_mathematics/chaos_game.php</a></li>
+        </ul>
+        <h1>Trivia</h1>
+        <ul>
+            <li>The <a href="javascript:void(0)" onclick="LoadPreset(3,1,2,false,false)">Sierpinski Triangle</a> has been found in Medieval Roman architecture.<sup>3</sup></li>
+            <li>Both the <a href="javascript:void(0)" onclick="LoadPreset(6,2,3,false,false)">Sierpinski Hexagon</a> and the <a href="javascript:void(0)" onclick="LoadPreset(6,2,3,true,false)">Hexaflake</a> include infinite Koch snowflakes.<sup>1</sup></li>
+            <li>The <a href="javascript:void(0)" onclick="LoadPreset(4,2,3,true,false)">Vicsek Fractal</a> has been found useful in antenna design.<sup>4</sup></sup></li>
+        </ul>
+        <h1>Citations</h1>
+        <ol>
+            <li><a href="https://handwiki.org/wiki/List_of_fractals_by_Hausdorff_dimension" target="_blank">https://handwiki.org/wiki/List_of_fractals_by_Hausdorff_dimension</a></li>
+            <li><a href="https://handwiki.org/wiki/N-flake#Pentaflake" target="_blank">https://handwiki.org/wiki/N-flake#Pentaflake</a></li>
+            <li><a href="https://beltoforion.de/en/recreational_mathematics/chaos_game.php" target="_blank">https://beltoforion.de/en/recreational_mathematics/chaos_game.php</a></li> 
+            <li><a href="https://handwiki.org/wiki/Vicsek_fractal" target="_blank">https://handwiki.org/wiki/Vicsek_fractal</a></li>
+        </ol>
         <script>
             const Canvas=document.getElementById("Canvas");
             const Sides=document.getElementById("Sides");
